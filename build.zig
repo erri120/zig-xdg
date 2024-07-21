@@ -4,8 +4,14 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    const xdg = b.addModule("xdg", .{
+        .target = target,
+        .optimize = optimize,
+        .root_source_file = b.path("src/root.zig"),
+    });
+
     const lib = b.addStaticLibrary(.{
-        .name = "zig-xdg",
+        .name = "xdg",
         .root_source_file = b.path("src/root.zig"),
         .target = target,
         .optimize = optimize,
@@ -14,12 +20,14 @@ pub fn build(b: *std.Build) void {
     b.installArtifact(lib);
 
     const exe = b.addExecutable(.{
-        .name = "zig-xdg",
+        .name = "xdg",
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
 
+    exe.root_module.addImport("xdg", xdg);
+    exe.linkLibC();
     b.installArtifact(exe);
 
     const run_cmd = b.addRunArtifact(exe);
